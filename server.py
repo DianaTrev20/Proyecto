@@ -1,16 +1,12 @@
-from flask import Flask, render_template, Response, request, redirect, url_for, session, jsonify, send_from_directory  #Framework para crear la aplicación web
-import cv2 #OpenCV, para capturar imágenes y procesarlas.
-import tensorflow as tf #Para cargar el modelo de reconocimiento facial
+from flask import Flask, render_template, Response, request, redirect, url_for, session, jsonify, send_from_directory
+import cv2
+import tensorflow as tf
 import numpy as np
-import os #Manejo de archivos y carpetas.
+import os
 import time
-import glob #Para eliminar imágenes guardadas en la carpeta de uploads
+import glob
 
-
-# creando validacion para sesion por reconocimiento facial
-
-#crea la aplicacion web con Flask
-app = Flask(__name__) 
+app = Flask(__name__)
 app.secret_key = 'supersecretkey'
 
 # Cargar el modelo de reconocimiento facial
@@ -22,8 +18,7 @@ usuarios = {
 }
 
 # Cargar el clasificador de rostros Haar Cascade early store
-#Carga un modelo Haar Cascade preentrenado para detectar rostros en imágenes :D
-face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml') 
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
 captura = cv2.VideoCapture(0)
 upload_folder = "static/uploads"
@@ -34,7 +29,6 @@ validaciones_exitosas = 0
 
 
 @app.route('/')
-#Renderiza index.html, mostrando los usuarios disponibles.
 def index():
     return render_template("index.html", usuarios=usuarios)
 
@@ -43,8 +37,7 @@ def index():
 def seleccionar_usuario(usuario):
     if usuario in usuarios:
         session['usuario'] = usuario
-        # Debugginggggg
-        print(f"Usuario seleccionado: {usuario}")  
+        print(f"Usuario seleccionado: {usuario}")  # Debugging
         return redirect(url_for('validacion'))
     return redirect(url_for('index'))
 
@@ -73,11 +66,10 @@ def capturar_imagen():
 
     # **Detectar nivel de luz**
     brillo_promedio = np.mean(gray)
-    umbral_luz = 50 
+    umbral_luz = 50  # Ajusta este valor según pruebas
 
     if brillo_promedio < umbral_luz:
-        validaciones_exitosas = 0  
-        # Reiniciar si el ambiente es oscuro
+        validaciones_exitosas = 0  # Reiniciar si el ambiente es oscuro
         return jsonify({
             "mensaje": "Ambiente demasiado oscuro",
             "autorizado": False,
@@ -89,8 +81,7 @@ def capturar_imagen():
     faces = face_cascade.detectMultiScale(gray, 1.3, 5)
 
     if len(faces) == 0:
-        validaciones_exitosas = 0  
-        # Reiniciar si no detecta rostros
+        validaciones_exitosas = 0  # Reiniciar si no detecta rostros
         return jsonify({
             "mensaje": "No se detectó ningún rostro",
             "autorizado": False,
@@ -100,14 +91,13 @@ def capturar_imagen():
 
     for (x, y, w, h) in faces:
         rostro = frame[y:y + h, x:x + w]
-        # Normalización
-        rostro = cv2.resize(rostro, (128, 128)) / 255.0  
+        rostro = cv2.resize(rostro, (128, 128)) / 255.0  # Normalización
         rostro = np.expand_dims(rostro, axis=0)
 
         prediccion = modelo.predict(rostro)
-        confianza = np.max(prediccion) 
-        # Umbral de confianza
-        if np.argmax(prediccion) == usuario_id and confianza > 0.7:  
+        confianza = np.max(prediccion)  # Confianza de la predicción
+
+        if np.argmax(prediccion) == usuario_id and confianza > 0.7:  # Umbral de confianza
             validaciones_exitosas += 0.1
         else:
             validaciones_exitosas = 0
@@ -117,8 +107,7 @@ def capturar_imagen():
         cv2.imwrite(imagen_path, frame)
 
         # **Autenticación basada en tiempo continuo**
-        # 3 segundos acumulados
-        if validaciones_exitosas >= 1:  
+        if validaciones_exitosas >= 1:  # 3 segundos acumulados
             session['autenticado'] = True
             limpiar_carpeta()
             return jsonify({
@@ -153,14 +142,7 @@ def bienvenida():
 def pagina_bienvenida():
     return render_template("bienvenida.html")
 
-@app.route('/logout')
-def logout():
-    session.pop('usuario', None)
-    session.pop('autenticado', None)
-    global validaciones_exitosas
-    # Reiniciar validaciones
-    validaciones_exitosas = 0  
-    return redirect(url_for('index'))
+
 
 def limpiar_carpeta():
     """ Elimina todas las imágenes en la carpeta uploads. """
@@ -170,4 +152,4 @@ def limpiar_carpeta():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5001)  
+    app.run(debug=True)
