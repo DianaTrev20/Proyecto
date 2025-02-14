@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validación Facial</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fff;
+            color: white;
+            text-align: center;
+            color: #000;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        img {
+            width: 40%;
+            border: 3px solid white;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+        .mensaje {
+            margin-top: 20px;
+            font-size: 20px;
+        }
+        #barra_progreso {
+            width: 60%;
+            height: 20px;
+            background-color: #444;
+            margin: 10px auto;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        #progreso {
+            width: 0%;
+            height: 100%;
+            background-color: limegreen;
+            transition: width 0.5s;
+        }
+    </style>
+</head>
+<body>
+    <h1>Validación Facial</h1>
+    <div class="container">
+        <img id="imagen" src="/static/uploads/captura.jpg" alt="Captura">
+        <p class="mensaje">Por favor, mantente en el encuadre hasta que el sistema confirme tu identidad.</p>
+        <p id="estado">Verificando...</p>
+        <div id="barra_progreso"><div id="progreso"></div></div>
+    </div>
+
+    <script>
+        function actualizarValidacion() {
+            fetch('/capturar_imagen')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('estado').innerText = data.mensaje;
+
+                    if (data.imagen) {
+                        document.getElementById('imagen').src = "/imagen_actual?" + new Date().getTime();
+                    }
+
+                    document.getElementById('progreso').style.width = (data.validaciones) * 100 + "%";
+
+                    if (data.autorizado) {
+                        window.location.href = "/bienvenida";
+                    }
+                })
+                .catch(error => console.error("Error:", error));
+        }
+
+        setInterval(actualizarValidacion, 500);
+    </script>
+</body>
+</html>
