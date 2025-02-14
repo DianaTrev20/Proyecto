@@ -7,7 +7,7 @@ import time
 import glob #Para eliminar imágenes guardadas en la carpeta de uploads
 
 
-# creando validacion para sesion por reconocimiento facial
+# creando validacion para sesion por reconocimiento a
 
 app = Flask(__name__) #crea la aplicacion web con Flask
 app.secret_key = 'supersecretkey'
@@ -145,7 +145,14 @@ def bienvenida():
 def pagina_bienvenida():
     return render_template("bienvenida.html")
 
-
+@app.route('/logout')
+def logout():
+    """ Cierra la sesión y borra las variables de autenticación """
+    session.pop('usuario', None)
+    session.pop('autenticado', None)
+    global validaciones_exitosas
+    validaciones_exitosas = 0  # Reiniciar validaciones
+    return redirect(url_for('index'))
 
 def limpiar_carpeta():
     """ Elimina todas las imágenes en la carpeta uploads. """
@@ -155,4 +162,5 @@ def limpiar_carpeta():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5001)  # Cambiar a otro puerto disponible
+    # app.run(debug=True)
