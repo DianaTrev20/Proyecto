@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selecciona tu Perfil</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #141414;
+            color: white;
+            text-align: center;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .perfil {
+            display: inline-block;
+            margin: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .perfil img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+        }
+        .perfil:hover {
+            transform: scale(1.1);
+        }
+        .perfil:hover img {
+            border-color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Selecciona tu Perfil</h1>
+    <div class="container">
+        <div class="perfil" onclick="seleccionarPerfil('betsy')">
+            <img src="static/betsy.jpg" alt="Betsy">
+            <p>Betsy-1994</p>
+        </div>
+        <div class="perfil" onclick="seleccionarPerfil('diana')">
+            <img src="static/diana.jpg" alt="Diana">
+            <p>Doraemon-05:3</p>
+        </div>
+        <div class="perfil" onclick="seleccionarPerfil('eder')">
+            <img src="static/eder.jpg" alt="Eder">
+            <p>Elmer Omero</p>
+        </div>
+    </div>
+
+    <script>
+    function seleccionarPerfil(usuario) {
+        window.location.href = "/seleccionar/" + usuario;
+    }
+</script>
+
+</body>
+</html>
